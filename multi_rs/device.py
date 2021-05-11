@@ -1,6 +1,8 @@
 import pyrealsense2 as rs
 from enum import Enum
 
+from .Frameset_wrapper import FramesetWrapper
+
 align_to = rs.stream.color
 align = rs.align(align_to)
 
@@ -59,8 +61,9 @@ class Device:
            case None: 
                poll 해서 값이 없다면 반환
             
-           case 
-
+           case FramesetWrapper:
+               해당 프레임셋이 있으면 프레임셋 래퍼로 반환
+        
         """
         if not self._status == DeviceStatus.Enable:
             raise DisableDeviceError()
@@ -74,9 +77,10 @@ class Device:
         if self._align:
             frameset = align.process(frameset)
 
-        return self._get_frames(frameset,streams)
+        new_frameset= self._get_frames(frameset,streams)
+        return FramesetWrapper(new_frameset)
 
-    
+ 
     def get_status(self):
         return self._status
 

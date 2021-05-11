@@ -31,7 +31,11 @@ class DeviceContext:
 
 ### public method ###########################################################################################################################################
     def enable_all_devices(self):
-        print(str(len(self._available_devices)) + " devices have been found")
+        len_device = len(self._available_devices)
+        if len_device is 0:
+            raise RuntimeError("장치가 없습니다.")
+            
+        print(str(len_device) + " devices have been found")
 
         for device in self._devices:
             enabled = device.enable_device(self._config)
