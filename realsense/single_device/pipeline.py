@@ -1,6 +1,6 @@
 import pyrealsense2 as rs
 import abc
-
+from enum import IntEnum
 
 """
 사실 장치가 곧 파이프라인이라서 나누는게 의미가 있을까 싶은데
@@ -9,6 +9,15 @@ import abc
  그래서 그거 단순화 시킬려고 래핑했습니다.  
 
 """
+
+class Preset(IntEnum):
+    Custom = 0
+    Default = 1
+    Hand = 2
+    HighAccuracy = 3
+    HighDensity = 4
+    MediumDensity = 5
+
 
 align_to = rs.stream.color
 align = rs.align(align_to)
@@ -37,25 +46,10 @@ class PipelineImp(metaclass=abc.ABCMeta):
         raise NotImplemented
 
 
-    @abc.abstractmethod
-    def wait_for_frames(self):
-        """
-        동기로 프레임 확인
 
-        return:
-            - List(rs.frameset)
-            - ?
-        """
-        raise NotImplemented
+    def get_depth_scale(self):
+        return self._depth_scale
 
-
-    def set_align(self,set_boolean=False):
-        self.__align = set_boolean
-        return self
-
-    def is_align(self):
-        return self.__align
-    
 
     def get_streams(self):
         if self._pipeline_profile is None:
@@ -114,13 +108,14 @@ class Pipeline(PipelineImp):
         self._config = config
         self._pipeline = None
         self._pipeline_profile = None
-        self.set_align(False)
-        
-    
+     
+
     def start(self,device_serial):
         self._pipeline=  rs.pipeline()
         self._config.enable_device(device_serial)
         self._pipeline_profile = self._pipeline.start(self._config)
+     
+        self._set_default_config()
 
     
     def poll_for_frames(self):
@@ -135,25 +130,33 @@ class Pipeline(PipelineImp):
         if frames.size() != len(streams):
             return None
 
-        if  self.is_align():
-            frames =  align.process(frames)
+
+        frames = align.process(frames)
+        print("으잉??",len(streams),frames)
 
         return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
 
+    def _set_default_config(self):
+        depth_sensor = self._pipeline_profile.get_device().first_depth_sensor()
+        depth_sensor.set_option(rs.option.visual_preset, Preset.HighAccuracy)
+        self._depth_scale = depth_sensor.get_depth_scale()
 
-    def wait_for_frames(self):
-        if self._pipeline is None:
-            raise RuntimeError("파이프라인이 None 입니다")
-        streams = self.get_streams()
-        frames =self._pipeline.wait_for_frames() 
+    
+
+
+
+    # def wait_for_frames(self):
+    #     if self._pipeline is None:
+    #         raise RuntimeError("파이프라인이 None 입니다")
+    #     streams = self.get_streams()
+    #     frames =self._pipeline.wait_for_frames() 
         
-        if frames.size() != len(streams):
-              raise RuntimeError("스트림과 프레임이 개수가 서로 다릅니다.")
-              
-        if  self.is_align():
-            frames =  align.process(frames)
+    #     if frames.size() != len(streams):
+    #           raise RuntimeError("스트림과 프레임이 개수가 서로 다릅니다.")
 
-        return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
+    #     return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
+
+
 
     
     

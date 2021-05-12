@@ -67,19 +67,9 @@ class DeviceImp(metaclass=abc.ABCMeta):
             - DeviceStatus: 현재 장치 상태
         """
         return self._status
-
-
-    def set_align(self,set_boolean=False):
-        """
-           frameset에서 color와 depth 정렬할 지 설정 
-           param:
-            - boolean : set_boolean 
-        """
-        raise NotImplemented
-      
-          
-    def is_align(self):
-        raise NotImplemented
+    
+    def get_depth_scale(self):
+        return  self._pipeline.get_depth_scale()
 
 
 
@@ -107,17 +97,3 @@ class Device(DeviceImp):
             return None
 
         return FramesetWrapper(frame_dic)
-
-
-    def set_align(self,set_boolean=False): # 위임
-        if  self._pipeline is None:
-            raise RuntimeError("파이프라인 None 입니다.")
-        self._pipeline.set_align(set_boolean)
-      
-    
-    def is_align(self): #위임
-        if  self._pipeline is None:
-            raise RuntimeError("파이프라인 None 입니다.")
-        return self._pipeline.is_align()
-
-   

@@ -1,5 +1,9 @@
 import numpy as np
 import cv2
+import pyrealsense2 as rs
+
+align_to = rs.stream.color
+rs_align = rs.align(align_to)
 
 class FramesetWrapper:
     def __init__(self,frameset):
@@ -76,6 +80,25 @@ class FramesetWrapper:
         return cv2.applyColorMap(cv2.convertScaleAbs(depth_np, alpha=0.03), cv2.COLORMAP_JET)
 
     
+    def get_intrinsic(self):
+        reconstructed_frameset = self._restructure_frameset()
+        if reconstructed_frameset is None:
+            return None
+        color_frame= reconstructed_frameset.get("color")
+        depth_frame= reconstructed_frameset.get("depth")
+
+        color_intrinsic = color_frame.profile.as_video_stream_profile().intrinsics
+        depth_intrinsic = depth_frame.profile.as_video_stream_profile().intrinsics
+
+        return color_intrinsic,depth_intrinsic
+
+   
+    def align(self):
+        self.frameset = rs_align.process(self.frameset)
+        return None
+
+
+
     # def remove_bg(self,depth_3channel_list, color_list,grey_color=153,clipping_distance=0.03):
     #     # 작동 안함..  고치긴 해야할듯?
     #     ret = []
