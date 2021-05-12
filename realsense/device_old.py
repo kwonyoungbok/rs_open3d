@@ -56,17 +56,8 @@ class Device:
 
 
     def poll_frames(self):
-        """
-         return case:
-           case None: 
-               poll 해서 값이 없다면 반환
-            
-           case FramesetWrapper:
-               해당 프레임셋이 있으면 프레임셋 래퍼로 반환
-        
-        """
         if not self._status == DeviceStatus.Enable:
-            raise DisableDeviceError()
+            raise RuntimeError("not enable device")
    
         streams = self._get_streams()
         frameset = self._get_poll_frameset()
@@ -89,7 +80,7 @@ class Device:
         self._pipeline.stop()
       
 
-    def set_allign(self,set_boolean=False):
+    def set_align(self,set_boolean=False):
         self._align = set_boolean
         return self
     
@@ -132,47 +123,3 @@ class Device:
 
 
 
-    def _get_device_intrinsics(self, frames):
-        """
-         대체 뭐하는 메서드인지 이해못함. intrinsics가 뭘까?
-        Get the intrinsics of the imager using its frame delivered by the realsense device
-        Parameters:
-        -----------
-        frames : rs::frame
-                 The frame grabbed from the imager inside the Intel RealSense for which the intrinsic is needed
-        Return:
-        -----------
-        device_intrinsics : dict
-        keys  : serial
-                Serial number of the device
-        values: [key]
-                Intrinsics of the corresponding device
-        """
-        device_intrinsics = {}
-        for (serial, frameset) in frames.items():
-            device_intrinsics[serial] = {}
-            for key, value in frameset.items():
-                device_intrinsics[serial][key] = value.get_profile().as_video_stream_profile().get_intrinsics()
-        return device_intrinsics
-
-    def _get_depth_to_color_extrinsics(self, frames):
-        """ 역시 뭐하는 함수인지 모름
-        Get the extrinsics between the depth imager 1 and the color imager using its frame delivered by the realsense device
-        Parameters:
-        -----------
-        frames : rs::frame
-                 The frame grabbed from the imager inside the Intel RealSense for which the intrinsic is needed
-        Return:
-        -----------
-        device_intrinsics : dict
-        keys  : serial
-                Serial number of the device
-        values: [key]
-                Extrinsics of the corresponding device
-        """
-        device_extrinsics = {}
-        for (serial, frameset) in frames.items():
-            device_extrinsics[serial] = frameset[
-                rs.stream.depth].get_profile().as_video_stream_profile().get_extrinsics_to(
-                frameset[rs.stream.color].get_profile())
-        return device_extrinsics

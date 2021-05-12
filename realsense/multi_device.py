@@ -1,9 +1,7 @@
 import pyrealsense2 as rs
-import numpy as np
-import cv2
-import sys
 
-from .device import Device
+
+from .single_device.device import Device
 
 
 # 다중 디바이스 관리 객체
