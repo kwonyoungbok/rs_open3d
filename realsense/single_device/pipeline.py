@@ -15,7 +15,73 @@ align = rs.align(align_to)
 
 class PipelineImp(metaclass=abc.ABCMeta):
 
+    @abc.abstractmethod
+    def start(self,device_serial):
+        """
+         param:
+            - string: device_serial
+        """
+        raise NotImplemented
+
+
+    @abc.abstractmethod
+    def poll_for_frames(self):
+        """
+        비동기로 프레임 확인
+        따라서 1초 30프레임이면 최소 1초에 30번 loop 돌려서 결과 얻어야한다.
+
+        return:
+            - List(rs.frameset)
+            - None
+        """
+        raise NotImplemented
+
+
+    @abc.abstractmethod
+    def wait_for_frames(self):
+        """
+        동기로 프레임 확인
+
+        return:
+            - List(rs.frameset)
+            - ?
+        """
+        raise NotImplemented
+
+
+    def set_align(self,set_boolean=False):
+        self.__align = set_boolean
+        return self
+
+    def is_align(self):
+        return self.__align
     
+
+    def get_streams(self):
+        if self._pipeline_profile is None:
+            raise  RuntimeError("파이프라인 None 입니다")
+        streams =  self._pipeline_profile.get_streams()
+        if streams is None:
+            raise  RuntimeError("스트림 설정 오류 입니다.")
+        return streams
+
+    
+    def find_stream(self,stream_type = rs.stream.depth):
+        """
+        param:
+            - rs.stream.* : stream_type = 예를 들어서 rs.stream.depth 설정
+
+        return:
+            - stream
+            - None
+        """
+
+        for stream in  self.get_streams():
+            if stream_type ==  stream.stream_type():
+                return stream
+        return None
+
+ 
     @staticmethod
     def make_frame_dic_key_by_stream(frames, streams):
         """
@@ -43,84 +109,6 @@ class PipelineImp(metaclass=abc.ABCMeta):
         return frame_dic
 
 
-
-    @abc.abstractmethod
-    def start(self,device_serial):
-        """
-         param:
-            - string: device_serial
-        """
-        raise NotImplemented
-
-    def set_align(self,set_boolean=False):
-        self.__align = set_boolean
-        return self
-
-    def is_align(self):
-        return self.__align
-
-    
-    def poll(self):
-        """
-        return:
-            - None
-            - dict( key=stream_type(), value=frame)
-         
-        """
-        streams = self.get_streams()
-        frames =  self.poll_for_frames()
-        
-        if streams is None:
-            raise RuntimeError("스트림이 제대로 설정 안되어있습니다. ")
-        
-        if frames is None:
-            return None
-
-        if frames.size() != len(streams):
-            return None
-
-        if  self.is_align():
-            frames =  align.process(frames)
-
-        return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
-
-
-    @abc.abstractmethod
-    def get_streams(self):
-        """
-          return: 
-            - List(rs.stream)
-            - None
-        """
-        raise NotImplemented
-    
-    @abc.abstractmethod
-    def poll_for_frames(self):
-        """
-        return:
-            - List(rs.frameset)
-            - None
-        """
-        raise NotImplemented
-
-    def find_stream(self,stream_type = rs.stream.depth):
-        """
-        param:
-            - rs.stream.* : stream_type = 예를 들어서 rs.stream.depth 설정
-
-        return:
-            - stream
-            - None
-        """
-
-        for stream in  self.get_streams():
-            if stream_type ==  stream.stream_type():
-                return stream
-        return None
-    
-
-
-
 class Pipeline(PipelineImp):
     def __init__(self,config):
         self._config = config
@@ -134,16 +122,40 @@ class Pipeline(PipelineImp):
         self._config.enable_device(device_serial)
         self._pipeline_profile = self._pipeline.start(self._config)
 
-    def get_streams(self):
-        if self._pipeline_profile is None:
-            return None
-        return self._pipeline_profile.get_streams()
     
     def poll_for_frames(self):
         if self._pipeline is None:
-            return None
-        return self._pipeline.poll_for_frames() # 여기서도 널 반환함
+            raise RuntimeError("파이프라인이 None 입니다")
+        frames=  self._pipeline.poll_for_frames() # 여기서도 널 반환함
+        streams = self.get_streams()
 
+        if frames is None:
+            return None
+
+        if frames.size() != len(streams):
+            return None
+
+        if  self.is_align():
+            frames =  align.process(frames)
+
+        return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
+
+
+    def wait_for_frames(self):
+        if self._pipeline is None:
+            raise RuntimeError("파이프라인이 None 입니다")
+        streams = self.get_streams()
+        frames =self._pipeline.wait_for_frames() 
+        
+        if frames.size() != len(streams):
+              raise RuntimeError("스트림과 프레임이 개수가 서로 다릅니다.")
+              
+        if  self.is_align():
+            frames =  align.process(frames)
+
+        return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
+
+    
     
 
     

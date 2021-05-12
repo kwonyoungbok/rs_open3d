@@ -32,7 +32,7 @@ class DeviceImp(metaclass=abc.ABCMeta):
         raise NotImplemented
 
     @abc.abstractmethod
-    def poll_frames(self):
+    def poll_for_frames(self):
         """
         계속 호출해서 장치에 새로운 프레임셋 있는지 확인하고 반환하는 함수
 
@@ -43,7 +43,7 @@ class DeviceImp(metaclass=abc.ABCMeta):
 
         """
         raise NotImplemented
-    
+
     
     def get_status(self):
         """
@@ -96,12 +96,12 @@ class Device(DeviceImp):
         self._status= DeviceStatus.Enable
         return True
 
-    def poll_frames(self):
+    def poll_for_frames(self):
         if not self._status == DeviceStatus.Enable:
             raise RuntimeError("not enable device")
        
         pipeline = self._pipeline
-        frame_dic =  pipeline.poll()
+        frame_dic =  pipeline.poll_for_frames()
 
         if frame_dic is None:
             return None

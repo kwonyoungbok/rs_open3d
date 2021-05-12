@@ -11,7 +11,7 @@ if __name__ == "__main__":
         # builder 만드는것도 괜찮겠네.. 너무 복잡해 만드는게.
     c = rs.config()
     c.enable_stream(rs.stream.depth, 1024, 768, rs.format.z16, 30)
-    c.enable_stream(rs.stream.color, 1920, 1080, rs.format.bgr8, 15)
+    c.enable_stream(rs.stream.color, 1920, 1080, rs.format.bgr8, 30)
     device_manager = DeviceContext(rs.context(), c)
     device_manager.enable_all_devices()   
     try:
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         # device_manager = DeviceContext(rs.context(), c)
         # device_manager.enable_all_devices()   
         while True:
-            frames = device_manager.poll_frames_all_devices()
+            frames = device_manager.poll_for_frames_all_devices()
             print(frames)
            
             for frame in frames.values():

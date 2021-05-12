@@ -41,11 +41,16 @@ class DeviceContext:
                 self._enabled_devices_dic[device.get_device_serial()]=device
 
     
-    def poll_frames_all_devices(self):
+    def poll_for_frames_all_devices(self):
         frames = {}
-        while len(frames) < len(self._enabled_devices_dic):
+
+        enabled_devices_length = len(self._enabled_devices_dic)
+        if enabled_devices_length == 0:
+            raise RuntimeError("준비된 장치가 0개 입니다.")
+
+        while len(frames) < enabled_devices_length:
             for (_,device) in self._enabled_devices_dic.items():
-              frame =  device.poll_frames()
+              frame =  device.poll_for_frames()
               if frame is None:
                   continue
               frames[device.get_device_serial()]=frame
