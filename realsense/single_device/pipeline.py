@@ -132,12 +132,24 @@ class Pipeline(PipelineImp):
 
 
         frames = align.process(frames)
-        print("으잉??",len(streams),frames)
+        print("여기 고쳐야된다..",len(streams),frames)
 
         return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
 
     def _set_default_config(self):
         depth_sensor = self._pipeline_profile.get_device().first_depth_sensor()
+        color_sensor = self._pipeline_profile.get_device().first_color_sensor()
+        color_sensor.set_option(rs.option.enable_auto_exposure,False)
+        color_sensor.set_option(rs.option.enable_auto_white_balance,False)
+        color_sensor.set_option(rs.option.exposure, 100)
+        color_sensor.set_option(rs.option.gain, 256)
+        color_sensor.set_option(rs.option.brightness, 0)
+        color_sensor.set_option(rs.option.saturation,50)
+        color_sensor.set_option(rs.option.sharpness,100)
+        color_sensor.set_option(rs.option.white_balance,4500)
+
+
+        print(color_sensor)
         depth_sensor.set_option(rs.option.visual_preset, Preset.HighAccuracy)
         self._depth_scale = depth_sensor.get_depth_scale()
 

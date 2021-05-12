@@ -25,11 +25,11 @@ class Controller(ControllerImp):
        frameset_wrapper_dic = self._multi_device.poll_for_frames_all_devices()
        depth_scale = self._multi_device.get_depth_scale()
 
-       for frameset_wrapper in frameset_wrapper_dic.values():
+       for name,frameset_wrapper in frameset_wrapper_dic.items():
           # frameset_wrapper.align()
            point_cloud_data = PointCloudData(frameset_wrapper,depth_scale)
            point_cloud_data.make_pcd()
-           point_cloud_data.save_pcd()
+           point_cloud_data.save_pcd(name)
       
 
     

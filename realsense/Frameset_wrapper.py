@@ -42,20 +42,27 @@ class FramesetWrapper:
    
     def _to_np(self):
         """
-         주의 depth 3channel로 증강 시킨다.
         """
         recon = self._restructure_frameset()
+
+        print(recon,"응?")
         if recon is None:
             return None
         ret = {}
         for name ,frame in recon.items():
-            ret[name]= np.asanyarray(frame.get_data())
             if name == "depth":
-                ret[name]= np.dstack((ret[name],ret[name],ret[name]))        
+                ret[name]= np.array(frame.get_data())
+                #ret[name]= np.dstack((ret[name],ret[name],ret[name])) 
+            elif name == "color":
+                ret[name]= np.asarray(frame.get_data())
+                ret[name]= ret[name][...,::-1].copy()
+
+            
         return ret
     
     def get_color_np(self):
         np_set = self._get_np_set()
+
         if np_set is None:
             return None
         color_np = np_set.get('color')  
