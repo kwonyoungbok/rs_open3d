@@ -1,5 +1,7 @@
 import open3d as o3d
 import time 
+import copy
+import cv2
 
 from realsense.Frameset_wrapper import FramesetWrapper
 
@@ -24,11 +26,27 @@ class PointCloudData:
 
     
 
+    def get_pcd(self):
+        if self._pcd is None:
+            raise RuntimeError("pcd가 None 입니다.")
+        return copy.deepcopy(self._pcd)
+
+
+    def transform(self,transformation_matrix):
+        copied_pcd = self.get_pcd()
+        copied_pcd.transform(transformation_matrix)
+        return copied_pcd
+
+
+
     def make_pcd(self):
         depth_np = self._frameset_wrapper.get_depth_np()
         color_np = self._frameset_wrapper.get_color_np()
 
-        print(depth_np,color_np,"보자")
+        #cv2.imshow("depth",depth_np)
+        #cv2.imshow("color",color_np)
+
+
         depth_image = o3d.geometry.Image(depth_np)
         color_image = o3d.geometry.Image(color_np)
 
@@ -44,9 +62,15 @@ class PointCloudData:
                 rgbd_image, intrinsic)
         temp.transform(self.flip_transform)
 
+        # o3d.geometry.PointCloud.estimate_normals( # 정점 추론 까지
+        # temp,
+        # search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.5,
+        #                                                   max_nn=30))
+
         pcd = o3d.geometry.PointCloud()
         pcd.points = temp.points
         pcd.colors = temp.colors
+        #pcd.normals = temp.normals
         self._pcd = pcd
         return pcd
 

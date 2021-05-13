@@ -1,5 +1,5 @@
 import pyrealsense2 as rs
-
+import time 
 
 from .single_device.device import Device
 
@@ -40,6 +40,7 @@ class DeviceContext:
             raise RuntimeError("준비된 장치가 0개 입니다.")
 
         while len(frames) < enabled_devices_length:
+           
             for (_,device) in self._enabled_devices_dic.items():
               frame =  device.poll_for_frames()
               if frame is None:

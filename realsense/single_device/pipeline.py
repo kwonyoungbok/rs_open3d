@@ -137,6 +137,7 @@ class Pipeline(PipelineImp):
         return PipelineImp.make_frame_dic_key_by_stream(frames,streams)
 
     def _set_default_config(self):
+        #https://intelrealsense.github.io/librealsense/doxygen/rs__option_8h.html#a8b9c011f705cfab20c7eaaa7a26040e2
         depth_sensor = self._pipeline_profile.get_device().first_depth_sensor()
         color_sensor = self._pipeline_profile.get_device().first_color_sensor()
         color_sensor.set_option(rs.option.enable_auto_exposure,False)
