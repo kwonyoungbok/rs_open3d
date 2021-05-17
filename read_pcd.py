@@ -1,7 +1,7 @@
 import open3d as o3d
 import numpy as np
 
-pcd = o3d.io.read_point_cloud("1620801496.1653326.pcd")
+pcd = o3d.io.read_point_cloud("f0270455.pcd")
 print(pcd)
 print(np.asarray(pcd.points))
 

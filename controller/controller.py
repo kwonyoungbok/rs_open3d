@@ -28,8 +28,7 @@ class Controller(ControllerImp):
     
     def capture(self):
        mk_pcd_time = time.time()
-       for i in range(10):
-        frameset_wrapper_dic = self._multi_device.poll_for_frames_all_devices()
+       frameset_wrapper_dic = self._multi_device.poll_for_frames_all_devices()
        depth_scale = self._multi_device.get_depth_scale()
 
        pcd_list =[]
