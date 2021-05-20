@@ -40,14 +40,18 @@ class Controller(ControllerImp):
        print("pcd 생성 완료: ", time.time()-mk_pcd_time)
         
        regi_time = time.time()
-       _ ,tranformation_matrix=self._localRegistration.get_icp_p2p(pcd_list[0].get_pcd(),pcd_list[1].get_pcd())
-       print("registration 시간: ",time.time()-regi_time , " m: " ,tranformation_matrix)
+       #_ ,tranformation_matrix=self._localRegistration.get_icp_p2p(pcd_list[0].get_pcd(),pcd_list[1].get_pcd())
+      # _,tranformation_matrix = self._localRegistration.manual_registration(pcd_list[0].get_pcd(),pcd_list[1].get_pcd())
+      # print("registration 시간: ",time.time()-regi_time , " m: " ,tranformation_matrix)
 
        o3d.visualization.draw_geometries([pcd_list[0].get_pcd()])
        o3d.visualization.draw_geometries([pcd_list[1].get_pcd()])
-       source_pcd = pcd_list[0].transform(tranformation_matrix)
-       target_pcd = pcd_list[1].get_pcd()
-       o3d.visualization.draw_geometries([source_pcd, target_pcd])
+       o3d.visualization.draw_geometries([pcd_list[2].get_pcd()])
+       o3d.visualization.draw_geometries([pcd_list[3].get_pcd()])
+
+    #    source_pcd = pcd_list[0].transform(tranformation_matrix)
+    #    target_pcd = pcd_list[1].get_pcd()
+    #    o3d.visualization.draw_geometries([source_pcd, target_pcd])
 
 
 

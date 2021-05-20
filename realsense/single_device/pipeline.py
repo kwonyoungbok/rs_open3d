@@ -114,7 +114,6 @@ class Pipeline(PipelineImp):
         self._pipeline=  rs.pipeline()
         self._config.enable_device(device_serial)
         self._pipeline_profile = self._pipeline.start(self._config)
-     
         self._set_default_config()
 
     
@@ -138,7 +137,9 @@ class Pipeline(PipelineImp):
 
     def _set_default_config(self):
         #https://intelrealsense.github.io/librealsense/doxygen/rs__option_8h.html#a8b9c011f705cfab20c7eaaa7a26040e2
-        depth_sensor = self._pipeline_profile.get_device().first_depth_sensor()
+        depth_sensor = self._pipeline_profile.get_device().first_depth_sensor()        
+        depth_sensor.set_option( rs.option.min_distance, 0)
+
         color_sensor = self._pipeline_profile.get_device().first_color_sensor()
         color_sensor.set_option(rs.option.enable_auto_exposure,False)
         color_sensor.set_option(rs.option.enable_auto_white_balance,False)
