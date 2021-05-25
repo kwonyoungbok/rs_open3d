@@ -23,6 +23,10 @@ class Controller(ControllerImp):
         self._localRegistration= LocalRegistration()
 
 
+    def capture_and_save(self,index = 0):
+         self._multi_device.record_imgs(index)
+         
+
     def start(self):
         self._multi_device.enable_all_devices()
     

@@ -1,5 +1,10 @@
 import pyrealsense2 as rs
 import time 
+from os import makedirs
+from os.path import exists, join
+import shutil
+import cv2
+
 
 from .single_device.device import Device
 
@@ -54,6 +59,27 @@ class DeviceContext:
 
     def disable_streams(self):
         self._config.disable_all_streams()
+
+
+    def record_imgs(self, record_index  = 0):
+        base_path = '../dataset/realsense'
+        make_folder(base_path)
+
+        frames = self.poll_for_frames_all_devices()
+        for device_serial_name, frame in frames.items():
+            device_path = join(base_path,device_serial_name)
+            path_depth = join(device_path, "depth")
+            path_color = join(device_path, "color")
+            make_folder(path_depth)
+            make_folder(path_color)
+            
+            cv2.imwrite("%s/%s-%06d.png" % \
+                        (path_depth,device_serial_name, record_index), frame.get_depth_np())
+            cv2.imwrite("%s/%s-%06d.jpg" % \
+                        (path_color,device_serial_name, record_index), frame.get_color_np())
+
+
+        
 
 ### private method #######################################################################################################################################################
 
@@ -117,3 +143,19 @@ class DeviceContext:
     #     filtered_frame = temporal_filter.process(filtered_frame)
 
     #     return filtered_frame
+
+
+def make_folder(path_folder):
+    print(path_folder)
+    if not exists(path_folder):
+        makedirs(path_folder)
+
+"""
+굉장히 위험한 함수. 
+"""
+def make_clean_folder(path_folder):
+     if not exists(path_folder):
+        makedirs(path_folder)
+     else:
+        shutil.rmtree(path_folder)
+        makedirs(path_folder)
